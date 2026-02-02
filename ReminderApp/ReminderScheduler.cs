@@ -21,9 +21,15 @@
             _reminders.Add(reminder);
         }
 
-        public void RemoveReminder(Guid id)
+        public void RemoveReminder(Reminder reminder)
         {
-            _reminders.RemoveAll(r => r.id == id);
+            _reminders.Remove(reminder);
+        }
+
+        public void UpdateReminder(Reminder reminder)
+        {
+            _reminders.RemoveAll(r => r.Id == reminder.Id);
+            _reminders.Add(reminder);
         }
 
         public async Task RunAsync()

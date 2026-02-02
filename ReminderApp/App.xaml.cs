@@ -8,7 +8,7 @@ namespace ReminderApp
 {
     public partial class App : Application
     {
-        private TrayApp _trayApp;
+        private TrayApp? _trayApp;
 
         protected override void OnStartup(StartupEventArgs e)
         {

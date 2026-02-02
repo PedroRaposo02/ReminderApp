@@ -1,10 +1,12 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
 using ReminderApp.Notifications;
 using ReminderApp.Persistence;
 using ReminderApp.Scheduling;
+using ReminderApp.UI;
 using Application = System.Windows.Application;
 
 namespace ReminderApp.Tray
@@ -12,17 +14,14 @@ namespace ReminderApp.Tray
     public class TrayApp : IDisposable
     {
         private NotifyIcon _trayIcon;
-        private ReminderScheduler scheduler;
+        private readonly ReminderScheduler scheduler;
+        private ManageRemindersWindow? manageWindow;
+
+        private readonly List<Reminder> _persistedReminders = [];
 
         public TrayApp()
         {
-            _trayIcon = new NotifyIcon
-            {
-                Icon = SystemIcons.Information,
-                Text = "Reminder App",
-                Visible = true,
-                ContextMenuStrip = BuildContextMenu()
-            };
+            InitializeTrayIcon();
 
             scheduler = new ReminderScheduler();
 
@@ -39,46 +38,89 @@ namespace ReminderApp.Tray
             var bootstrap = new Reminder
                 {
                     Description = "Drink Water",
-                    Interval = TimeSpan.FromSeconds(2)
+                    Interval = TimeSpan.FromMinutes(1)
                 };
             scheduler.AddReminder(bootstrap);
+        }
 
-            var window = new AddReminderWindow();
-            if (window.ShowDialog() == true)
+        private void InitializeTrayIcon()
+        {
+            _trayIcon = new NotifyIcon
             {
-                var newReminder = window.CreatedReminder;
-                AddReminder(newReminder);
+                Icon = SystemIcons.Information,
+                Text = "Reminder App",
+                Visible = true,
+            };
+
+            _trayIcon.Click += (s, e) => OpenManageWindow();
+
+            // Right-click context menu
+            var contextMenu = new ContextMenuStrip();
+            contextMenu.Items.Add("Open", null, (s, e) => OpenManageWindow());
+            contextMenu.Items.Add("Exit", null, (s, e) => ExitApplication());
+            _trayIcon.ContextMenuStrip = contextMenu;
+
+        }
+
+        private void OpenManageWindow()
+        {
+            if (manageWindow == null || !manageWindow.IsVisible)
+            {
+                manageWindow = new ManageRemindersWindow(this); // Pass 'this' (TrayApp)
+                manageWindow.Show();
+            }
+            else
+            {
+                manageWindow.Activate();
             }
         }
 
-        private ContextMenuStrip BuildContextMenu()
+        private void ExitApplication()
         {
-            var menu = new ContextMenuStrip();
-
-            var exitItem = new ToolStripMenuItem("Exit");
-            exitItem.Click += (_, _) => Application.Current.Shutdown();
-
-            menu.Items.Add(exitItem);
-
-            return menu;
+            _trayIcon.Dispose();
+            Dispose();
+            Application.Current.Shutdown();
         }
 
-        private void AddReminder(Reminder reminder)
+        public void AddReminder(Reminder reminder)
         {
             scheduler.AddReminder(reminder);
-            ReminderStore.Save([..scheduler.Reminders]);
+            _persistedReminders.Add(reminder);
+            ReminderStore.Save(_persistedReminders);
         }
 
-        private void RemoveReminder(Reminder reminder)
+        public void RemoveReminder(Reminder reminder)
         {
-            scheduler.RemoveReminder(reminder); 
-            ReminderStore.save([.. scheduler.Reminders]);
+            scheduler.RemoveReminder(reminder);
+            _persistedReminders.Remove(reminder);
+            ReminderStore.Save(_persistedReminders);
         }
 
+        public void UpdateReminder(Reminder reminder) 
+        {
+            scheduler.UpdateReminder(reminder);
+            _persistedReminders.RemoveAll(r => r.Id == reminder.Id);
+            _persistedReminders.Add(reminder);
+            ReminderStore.Save(_persistedReminders);
+        }
+
+        public List<Reminder> GetReminders()
+        {
+            return [.. _persistedReminders]; // Return a copy
+        }
+      
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             _trayIcon.Visible = false;
             _trayIcon.Dispose();
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            // Cancel the close and hide instead
+            e.Cancel = true;
+            manageWindow?.Hide();
         }
     }
 }
