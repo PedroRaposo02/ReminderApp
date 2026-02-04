@@ -14,7 +14,7 @@ namespace ReminderApp.UI
     public partial class ManageRemindersWindow : Window
     {
         private TrayApp _trayApp;
-        public ObservableCollection<ReminderViewModel> Reminders { get; } = new();
+        public ObservableCollection<ReminderViewModel> Reminders { get; } = [];
         public ManageRemindersWindow(TrayApp trayApp)
         {
             _trayApp = trayApp;
@@ -25,7 +25,7 @@ namespace ReminderApp.UI
 
         private void LoadReminders()
         {
-            var reminders = _trayApp.GetReminders();
+            var reminders = _trayApp.GetAllReminders();
             foreach (var r in reminders)
             {
                 Reminders.Add(new ReminderViewModel(r));

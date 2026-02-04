@@ -10,7 +10,7 @@
         Height="420"
         Width="640"
         FontSize="14"
-        ShowInTaskbar="False"
+        ShowInTaskbar="True"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
         Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
@@ -29,7 +29,8 @@
 
         <!-- LIST VIEW -->
         <Border CornerRadius="8" Padding="8" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" Margin="0,0,0,10">
-            <ListView ItemsSource="{Binding Reminders}"
+            <ListView x:Name="RemindersList"
+                      ItemsSource="{Binding Reminders}"
                       SelectionMode="Single"
                       SnapsToDevicePixels="True"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"

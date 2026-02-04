@@ -32,6 +32,11 @@
             _reminders.Add(reminder);
         }
 
+        public IReadOnlyList<Reminder> GetReminders()
+        {
+            return _reminders.AsReadOnly();
+        }
+
         public async Task RunAsync()
         {
             try

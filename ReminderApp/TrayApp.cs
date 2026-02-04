@@ -13,9 +13,9 @@ namespace ReminderApp.Tray
 {
     public class TrayApp : IDisposable
     {
-        private NotifyIcon _trayIcon;
+        private NotifyIcon _trayIcon = null!;
         private readonly ReminderScheduler scheduler;
-        private ManageRemindersWindow? manageWindow;
+        private ManageRemindersWindow? _manageWindow;
 
         private readonly List<Reminder> _persistedReminders = [];
 
@@ -52,7 +52,7 @@ namespace ReminderApp.Tray
                 Visible = true,
             };
 
-            _trayIcon.Click += (s, e) => OpenManageWindow();
+            _trayIcon.MouseClick += TrayIcon_MouseClick;
 
             // Right-click context menu
             var contextMenu = new ContextMenuStrip();
@@ -64,22 +64,31 @@ namespace ReminderApp.Tray
 
         private void OpenManageWindow()
         {
-            if (manageWindow == null || !manageWindow.IsVisible)
+            if (_manageWindow == null || !_manageWindow.IsVisible)
             {
-                manageWindow = new ManageRemindersWindow(this); // Pass 'this' (TrayApp)
-                manageWindow.Show();
+                _manageWindow = new ManageRemindersWindow(this); // Pass 'this' (TrayApp)
+                _manageWindow.Closing += Window_Closing;
+                _manageWindow.Show();
             }
-            else
+            else if (!_manageWindow.IsVisible)
             {
-                manageWindow.Activate();
+                _manageWindow.Show();
             }
+
+            _manageWindow.Activate();
+            _manageWindow.WindowState = WindowState.Normal;
         }
 
-        private void ExitApplication()
+        private void TrayIcon_MouseClick(object? sender, MouseEventArgs e)
         {
-            _trayIcon.Dispose();
-            Dispose();
-            Application.Current.Shutdown();
+            if (e.Button == MouseButtons.Left) OpenManageWindow();
+        }
+
+        private void Window_Closing(object? sender, CancelEventArgs e)
+        {
+            // Cancel the close and hide instead
+            e.Cancel = true;
+            _manageWindow?.Hide();
         }
 
         public void AddReminder(Reminder reminder)
@@ -104,23 +113,32 @@ namespace ReminderApp.Tray
             ReminderStore.Save(_persistedReminders);
         }
 
+        // Returns only persisted reminders
         public List<Reminder> GetReminders()
         {
             return [.. _persistedReminders]; // Return a copy
+        }
+
+        // Returns all reminders including non-persisted ones
+        public List<Reminder> GetAllReminders()
+        {
+            return [.. scheduler.GetReminders()];
+        }
+
+        private void ExitApplication()
+        {
+            Dispose();
+            Application.Current.Shutdown();
         }
       
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            _trayIcon.Visible = false;
-            _trayIcon.Dispose();
-        }
-
-        private void Window_Closing(object sender, CancelEventArgs e)
-        {
-            // Cancel the close and hide instead
-            e.Cancel = true;
-            manageWindow?.Hide();
+            if (_trayIcon != null)
+            {
+                _trayIcon.Visible = false;
+                _trayIcon.Dispose();
+            }
         }
     }
 }

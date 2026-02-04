@@ -1,26 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReminderApp.Scheduling;
 
 namespace ReminderApp.UI
 {
-    public class ReminderViewModel
+    public class ReminderViewModel(Reminder reminder) : INotifyPropertyChanged
     {
-        public Reminder Reminder { get; }
+        public Reminder Reminder { get; } = reminder;
 
-        public bool IsEditing { get; set; } = false;
-        public bool IsSelected { get; set; } = false;
+        private bool _isEditing;
+        public bool IsEditing
+        {
+            get => _isEditing;
+            set
+            {
+                _isEditing = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                _isSelected = value;
+                OnPropertyChanged();
+            }
+        }
 
         // Editable Buffers
-        public string EditDescription { get; set; }
-        public double EditIntervalMinutes { get; set; }
-    
-        public ReminderViewModel(Reminder reminder)
+        public string EditDescription { get; set; } = reminder.Description;
+        public double EditIntervalMinutes { get; set; } = reminder.Interval.TotalMinutes;
+        public string FormattedInterval => TimeSpan.FromMinutes(EditIntervalMinutes).ToString(@"mm\:ss");
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null!)
         {
-            Reminder = reminder;
-            EditDescription = reminder.Description;
-            EditIntervalMinutes = reminder.Interval.TotalMinutes;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
