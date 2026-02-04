@@ -20,16 +20,15 @@
         <converters:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
         <converters:BoolToOpacityConverter x:Key="BoolToOpacity"/>
     </Window.Resources>
-
-    <Grid Margin="12">
+    <!-- LIST VIEW -->
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- LIST VIEW -->
-        <Border CornerRadius="8" Padding="8" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" Margin="0,0,0,10">
-            <ListView x:Name="RemindersList"
+        <ListView x:Name="RemindersList"
                       ItemsSource="{Binding Reminders}"
                       SelectionMode="Single"
                       SnapsToDevicePixels="True"
@@ -37,60 +36,168 @@
                       Background="Transparent"
                       BorderThickness="0">
 
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Width="650">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="560">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
 
-                                        <!-- Checkbox for selection -->
-                                        <CheckBox Margin="0,0,12,0" VerticalAlignment="Center"
+                                    <!-- Checkbox for selection -->
+                                    <CheckBox Margin="0,0,12,0" VerticalAlignment="Center"
+                                                  
                                                   IsChecked="{Binding IsSelected}"/>
 
-                                        <!-- Description -->
-                                        <Grid Width="200" Margin="0,0,8,0">
-                                            <TextBlock Text="{Binding Reminder.Description}"
+                                    <!-- Description -->
+                                    <Grid Width="150" Margin="0,0,8,0">
+                                        <TextBlock Text="{Binding Reminder.Description}"
                                                        Visibility="{Binding IsEditing, Converter={StaticResource InvBoolToVis}}"/>
-                                            <TextBox Text="{Binding EditDescription, UpdateSourceTrigger=PropertyChanged}"
+                                        <TextBox Text="{Binding EditDescription, UpdateSourceTrigger=PropertyChanged}"
                                                      Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}"/>
-                                        </Grid>
+                                    </Grid>
 
-                                        <!-- Interval -->
-                                        <Grid Width="80" Margin="0,0,8,0">
-                                            <TextBlock Text="{Binding Reminder.Interval.TotalMinutes}"
+                                    <!-- Interval -->
+                                    <Grid Width="80" Margin="0,0,8,0">
+                                        <TextBlock Text="{Binding Reminder.Interval, StringFormat='{}{0:mm}:{0:ss}'}" Width="60" Margin="0,0,12,0"
                                                        Visibility="{Binding IsEditing, Converter={StaticResource InvBoolToVis}}"/>
-                                            <TextBox Text="{Binding EditIntervalMinutes, UpdateSourceTrigger=PropertyChanged}"
+                                        <TextBox Text="{Binding EditIntervalMinutes, UpdateSourceTrigger=PropertyChanged, StringFormat='{}{0:mm}:{0:ss}'}"
                                                      Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}"/>
-                                        </Grid>
+                                    </Grid>
 
-                                        <!-- Next Fire Time (faded when editing) -->
-                                        <TextBlock Text="{Binding Reminder.NextFireTime}" Width="120" Margin="0,0,12,0"
+                                    <!-- Next Fire Time (faded when editing) -->
+                                    <TextBlock Text="{Binding Reminder.NextFireTime, StringFormat='{}{0:HH:mm:ss}'}" Width="80" Margin="0,0,12,0"
                                                    Opacity="{Binding IsEditing, Converter={StaticResource BoolToOpacity}}"
                                                    Visibility="{Binding IsEditing, Converter={StaticResource InvBoolToVis}}"/>
+                                    <!-- Time Remaining (faded when editing) -->
+                                    <TextBlock Text="{Binding TimeRemainingFormatted}" Width="60" Margin="0,0,12,0"
+                                                   Opacity="0.7"
+                                                   Visibility="{Binding IsEditing, Converter={StaticResource InvBoolToVis}}"/>
 
-                                        <!-- Edit (Pencil) Button - only in view mode -->
-                                        <Button Width="28" Height="28" Margin="0,0,4,0"
+                                    <!-- Edit (Pencil) Button - only in view mode -->
+                                    <Button Width="28" Height="28" Margin="0,0,4,0"
                                                 Visibility="{Binding IsEditing, Converter={StaticResource InvBoolToVis}}"
                                                 Click="EditButton_Click"
                                                 ToolTip="Edit">
-                                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE70F;" FontSize="14"/>
-                                        </Button>
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE70F;" FontSize="14"/>
+                                    </Button>
 
-                                        <!-- Save/Cancel buttons - only in edit mode -->
-                                        <StackPanel Orientation="Horizontal"
+                                    <!-- Save/Cancel buttons - only in edit mode -->
+                                    <StackPanel Orientation="Horizontal"
                                                     Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">
-                                            <Button Content="Save" Width="60" Margin="0,0,4,0" Click="SaveButton_Click"/>
-                                            <Button Content="Cancel" Width="60" Click="CancelButton_Click"/>
-                                        </StackPanel>
-
+                                        <Button Content="Save" Width="60" Margin="0,0,4,0" Click="SaveButton_Click"/>
+                                        <Button Content="Cancel" Width="60" Click="CancelButton_Click"/>
                                     </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-            </ListView>
+                                    <!-- Trash icon - only in view mode -->
+                                    <Button Width="28" Height="28" Margin="4,0,0,0"
+                                                Visibility="{Binding IsEditing, Converter={StaticResource InvBoolToVis}}"
+                                                Click="DeleteButton_Click"
+                                                ToolTip="Delete"
+                                                x:Name="TrashButton">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Foreground" Value="Gray"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="Red"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE74D;" FontSize="14"/>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <!-- Input row when adding -->
+        <Border BorderBrush="LightGray" BorderThickness="0,1,0,0" Margin="0,4,0,0" Padding="0,8,0,0">
+            <Grid>
+
+                <!-- Input row when adding -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                Visibility="{Binding IsAddingNew, Converter={StaticResource BoolToVis}}">
+
+                    <CheckBox IsEnabled="False" Margin="0,0,12,0" Width="16"/>
+
+                    <!-- Description input -->
+                    <TextBox x:Name="NewDescriptionBox" Width="200" Margin="0,0,8,0"
+                 Text="{Binding NewDescription, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <VisualBrush Stretch="None" AlignmentX="Left">
+                                                    <VisualBrush.Visual>
+                                                        <TextBlock Text="Description..." Foreground="Gray" Opacity="0.5" Margin="2,0,0,0"/>
+                                                    </VisualBrush.Visual>
+                                                </VisualBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+
+                    <!-- Interval input -->
+                    <TextBox x:Name="NewIntervalBox" Width="80" Margin="0,0,8,0"
+                 Text="{Binding NewIntervalMinutes, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <VisualBrush Stretch="None" AlignmentX="Left">
+                                                    <VisualBrush.Visual>
+                                                        <TextBlock Text="Minutes..." Foreground="Gray" Opacity="0.5" Margin="2,0,0,0"/>
+                                                    </VisualBrush.Visual>
+                                                </VisualBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+
+                    <TextBlock Width="120" Margin="0,0,8,0"/>
+                    <!-- Spacer for alignment -->
+
+                    <!-- Save/Cancel buttons -->
+                    <Button Content="Save" Width="60" Margin="0,0,4,0" Click="SaveNewButton_Click"/>
+                    <Button Content="Cancel" Width="60" Click="CancelNewButton_Click"/>
+                </StackPanel>
+
+                <!-- "Add" prompt when not adding -->
+                <Button Content="+ Add new reminder" 
+                        HorizontalAlignment="Left"
+                        Background="Transparent"
+                        Foreground="Gray"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Click="ShowAddRowButton_Click"
+                        Visibility="{Binding IsAddingNew, Converter={StaticResource InvBoolToVis}}"/>
+            </Grid>
         </Border>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Delete Selected" 
+            Width="80" Height="50" Margin="0,0,8,0"
+            Click="DeleteSelectedButton_Click"
+            Visibility="{Binding HasSelectedItems, Converter={StaticResource BoolToVis}}"
+            Background="Red"
+            Foreground="White"/>
+
+            <Button Content="+ Add Reminder" 
+                    Width="120"
+                    Click="AddReminderButton_Click"/>
+        </StackPanel>
     </Grid>
 </Window>

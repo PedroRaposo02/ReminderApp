@@ -38,10 +38,7 @@ namespace ReminderApp.Scheduling
         }
         public DateTime NextFireTime { get; set; }
         public bool Enabled { get; set; } = true;
-
-        public double MinutesUntilNext => Math.Max(0, (NextFireTime - DateTime.Now).TotalMinutes);
-        public double SecondsUntilNext => Math.Max(0, (NextFireTime - DateTime.Now).TotalSeconds);
-
+        
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged(string propertyName)
         {
