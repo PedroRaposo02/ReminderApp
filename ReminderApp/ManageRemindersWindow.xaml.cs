@@ -25,7 +25,7 @@ namespace ReminderApp.UI
         {
             get => _isAddingNew;
             set {
-                if (_isAddingNew)
+                if (_isAddingNew != value)
                 {
                     _isAddingNew = value;
                     OnPropertyChanged();
@@ -44,8 +44,8 @@ namespace ReminderApp.UI
             }
         }
 
-        private TimeSpan _newInterval;
-        public TimeSpan NewInterval
+        private TimeInput _newInterval = TimeInput.Zero;
+        public TimeInput NewInterval
         {
             get => _newInterval;
             set
@@ -104,7 +104,7 @@ namespace ReminderApp.UI
             {
                 vm.IsEditing = true;
                 vm.EditDescription = vm.Reminder.Description;
-                vm.EditInterval = vm.Reminder.Interval;
+                vm.EditInterval = TimeInput.FromTimeSpan(vm.Reminder.Interval);
             }
         }
 
@@ -113,7 +113,7 @@ namespace ReminderApp.UI
             if (sender is Button btn && btn.DataContext is ReminderViewModel vm)
             {
                 vm.Reminder.Description = vm.EditDescription;
-                vm.Reminder.Interval = vm.EditInterval;
+                vm.Reminder.Interval = vm.EditInterval.TotalTimeSpan;
 
                 _trayApp.UpdateReminder(vm.Reminder);
                 vm.IsEditing = false;
@@ -182,7 +182,7 @@ namespace ReminderApp.UI
             ShowAddRow();
         }
 
-        private void ShowReminderButton_Click(object sender, RoutedEventArgs e)
+        private void ShowAddRowButton_Click(object sender, RoutedEventArgs e)
         {
             ShowAddRow();
         }
@@ -209,8 +209,8 @@ namespace ReminderApp.UI
             var newReminder = new Reminder
             {
                 Description = NewDescription,
-                Interval = NewInterval,
-                NextFireTime = DateTime.Now.Add(NewInterval)
+                Interval = NewInterval.TotalTimeSpan,
+                NextFireTime = DateTime.Now.Add(NewInterval.TotalTimeSpan)
             };
 
             _trayApp.AddReminder(newReminder);
@@ -218,6 +218,9 @@ namespace ReminderApp.UI
             var vm = new ReminderViewModel(newReminder);
             vm.SelectionChanged += (s, ev) => OnPropertyChanged(nameof(HasSelectedItems));
 
+            Reminders.Add(vm);
+
+            NewInterval = TimeInput.Zero;
             IsAddingNew = false;
         }
 
@@ -225,6 +228,36 @@ namespace ReminderApp.UI
         private void CancelNewButton_Click(object sender, RoutedEventArgs e)
         {
             IsAddingNew = false;
+        }
+
+        private void SelectAll_Checked(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in Reminders)
+            {
+                item.IsSelected = true;
+            }
+        }
+
+        private void SelectAll_Unchecked(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in Reminders)
+            {
+                item.IsSelected = false;
+            }
+        }
+
+        private void SkipButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is ReminderViewModel vm)
+            {
+                // Find the next scheduled slot
+                while(vm.Reminder.NextFireTime <= DateTime.Now)
+                {
+                    vm.Reminder.NextFireTime = vm.Reminder.NextFireTime.Add(vm.Reminder.Interval);
+                }
+
+                _trayApp.UpdateReminder(vm.Reminder);
+            }
         }
     }
 }

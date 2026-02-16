@@ -26,12 +26,6 @@
             _reminders.Remove(reminder);
         }
 
-        public void UpdateReminder(Reminder reminder)
-        {
-            _reminders.RemoveAll(r => r.Id == reminder.Id);
-            _reminders.Add(reminder);
-        }
-
         public IReadOnlyList<Reminder> GetReminders()
         {
             return _reminders.AsReadOnly();

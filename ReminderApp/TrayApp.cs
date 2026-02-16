@@ -45,12 +45,15 @@ namespace ReminderApp.Tray
 
         private void InitializeTrayIcon()
         {
-            _trayIcon = new NotifyIcon
-            {
-                Icon = SystemIcons.Information,
-                Text = "Reminder App",
-                Visible = true,
-            };
+            _trayIcon = new NotifyIcon();
+
+            var iconUri = new Uri("pack://application:,,,/Icons/tray.ico");
+            var iconStream = Application.GetResourceStream(iconUri);
+
+            _trayIcon.Icon = new Icon(iconStream.Stream);
+
+            _trayIcon.Text = "Reminder App";
+            _trayIcon.Visible = true;
 
             _trayIcon.MouseClick += TrayIcon_MouseClick;
 
@@ -107,7 +110,8 @@ namespace ReminderApp.Tray
 
         public void UpdateReminder(Reminder reminder) 
         {
-            scheduler.UpdateReminder(reminder);
+            scheduler.RemoveReminder(reminder);
+            scheduler.AddReminder(reminder);
             _persistedReminders.RemoveAll(r => r.Id == reminder.Id);
             _persistedReminders.Add(reminder);
             ReminderStore.Save(_persistedReminders);

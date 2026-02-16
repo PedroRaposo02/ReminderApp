@@ -50,9 +50,20 @@ namespace ReminderApp.UI
 
         public string TimeRemainingFormatted => $"{(int)TimeRemaining.TotalMinutes:D2}:{TimeRemaining.Seconds:D2}";
 
+        public DateTime NextFireTime => Reminder.NextFireTime;
+
         // Editable Buffers
         public string EditDescription { get; set; }
-        public TimeSpan EditInterval { get; set; }
+        private TimeInput _editInterval;
+        public TimeInput EditInterval
+        {
+            get => _editInterval;
+            set
+            {
+                _editInterval = value;
+                OnPropertyChanged();
+            }
+        }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -60,7 +71,7 @@ namespace ReminderApp.UI
         {
             Reminder = reminder;
             EditDescription = reminder.Description;
-            EditInterval = reminder.Interval;
+            EditInterval = TimeInput.FromTimeSpan(reminder.Interval);
             UpdateTimeRemaining();
         }
 

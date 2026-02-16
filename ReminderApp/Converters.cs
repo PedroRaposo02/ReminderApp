@@ -9,9 +9,9 @@ namespace ReminderApp.Converters
 {
     public sealed class InverseBoolToVisibilityConverter : IValueConverter
     {
-        public object Convert(object value, Type y, object p, CultureInfo c) 
+        public object Convert(object value, Type y, object p, CultureInfo c)
             => (value is bool b && b) ? Visibility.Collapsed : Visibility.Visible;
-        public object ConvertBack(object value, Type y, object p, CultureInfo c) 
+        public object ConvertBack(object value, Type y, object p, CultureInfo c)
             => throw new NotImplementedException();
     }
 
@@ -29,5 +29,26 @@ namespace ReminderApp.Converters
             => (value is bool b && b) ? Visibility.Visible : Visibility.Collapsed;
         public object ConvertBack(object value, Type y, object p, CultureInfo c)
             => throw new NotImplementedException();
+    }
+
+    public sealed class TimeSpanConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is TimeSpan timeSpan)
+            {
+                return timeSpan.ToString(@"hh\:mm\:ss");
+            }
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string str && TimeSpan.TryParse(str, out var timeSpan))
+            {
+                return timeSpan;
+            }
+            return value;
+        }
     }
 }

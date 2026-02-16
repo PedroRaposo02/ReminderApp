@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace ReminderApp.Scheduling
@@ -36,11 +37,23 @@ namespace ReminderApp.Scheduling
                 }
             }
         }
-        public DateTime NextFireTime { get; set; }
+        private DateTime _nextFireTime;
+        public DateTime NextFireTime
+        {
+            get => _nextFireTime;
+            set
+            {
+                if (_nextFireTime != value)
+                {
+                    _nextFireTime = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
         public bool Enabled { get; set; } = true;
         
         public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
