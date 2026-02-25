@@ -16,6 +16,7 @@ namespace ReminderApp.Tray
         private NotifyIcon _trayIcon = null!;
         private readonly ReminderScheduler scheduler;
         private ManageRemindersWindow? _manageWindow;
+        private TrayMenuWindow? _trayMenu;
 
         private readonly List<Reminder> _persistedReminders = [];
 
@@ -33,14 +34,6 @@ namespace ReminderApp.Tray
             // Load saved reminders
             var reminders = ReminderStore.Load();
             foreach (var r in reminders) AddReminder(r);
-
-            // Add bootstrap/default reminder (does not get saved)
-            var bootstrap = new Reminder
-                {
-                    Description = "Drink Water",
-                    Interval = TimeSpan.FromMinutes(1)
-                };
-            scheduler.AddReminder(bootstrap);
         }
 
         private void InitializeTrayIcon()
@@ -57,12 +50,8 @@ namespace ReminderApp.Tray
 
             _trayIcon.MouseClick += TrayIcon_MouseClick;
 
-            // Right-click context menu
-            var contextMenu = new ContextMenuStrip();
-            contextMenu.Items.Add("Open", null, (s, e) => OpenManageWindow());
-            contextMenu.Items.Add("Exit", null, (s, e) => ExitApplication());
-            _trayIcon.ContextMenuStrip = contextMenu;
-
+            // Initialize custom WPF tray menu
+            _trayMenu = new TrayMenuWindow(OpenManageWindow, ExitApplication);
         }
 
         private void OpenManageWindow()
@@ -84,7 +73,21 @@ namespace ReminderApp.Tray
 
         private void TrayIcon_MouseClick(object? sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left) OpenManageWindow();
+            if (e.Button == MouseButtons.Left) 
+            {
+                OpenManageWindow();
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                if (_trayMenu != null)
+                {
+                    var point = System.Windows.Forms.Control.MousePosition;
+                    _trayMenu.Left = point.X - _trayMenu.Width / 2;
+                    _trayMenu.Top = point.Y - _trayMenu.Height - 10;
+                    _trayMenu.Show();
+                    _trayMenu.Activate();
+                }
+            }
         }
 
         private void Window_Closing(object? sender, CancelEventArgs e)
