@@ -2,7 +2,7 @@
 
 ReminderApp is a modern, lightweight, and perfectly-styled Windows desktop utility application built with C# and WPF. It lives quietly in your system tray and helps you manage recurring reminders with a beautiful, dark-themed Fluent UI.
 
-![ReminderApp Screenshot](/Icons/app.ico) <!-- Placeholder for a screenshot -->
+![ReminderApp Screenshot](/Images/Screenshot.png)
 
 ## Features
 

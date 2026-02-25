@@ -293,7 +293,7 @@
                     <GridViewColumn Width="720">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <Border Padding="12,12" HorizontalAlignment="Stretch">
+                                <Border Padding="6,12" HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <CheckBox Margin="12,0,16,0" VerticalAlignment="Center" IsChecked="{Binding IsSelected}" />
 
