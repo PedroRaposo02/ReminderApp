@@ -23,7 +23,7 @@ namespace ReminderApp.Persistence
         public static void Save(List<Reminder> reminders)
         {
             var dir = Path.GetDirectoryName(FilePath);
-            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            if (dir != null && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
             var json = JsonSerializer.Serialize(reminders, new JsonSerializerOptions
             {

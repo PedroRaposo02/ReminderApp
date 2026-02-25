@@ -34,7 +34,7 @@ namespace ReminderApp.UI
             }
         }
 
-        public event EventHandler SelectionChanged;
+        public event EventHandler? SelectionChanged;
 
         private TimeSpan _timeRemaining;
         public TimeSpan TimeRemaining
@@ -53,8 +53,8 @@ namespace ReminderApp.UI
         public DateTime NextFireTime => Reminder.NextFireTime;
 
         // Editable Buffers
-        public string EditDescription { get; set; }
-        private TimeInput _editInterval;
+        public string EditDescription { get; set; } = string.Empty;
+        private TimeInput _editInterval = TimeInput.Zero;
         public TimeInput EditInterval
         {
             get => _editInterval;
