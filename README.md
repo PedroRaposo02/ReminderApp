@@ -24,8 +24,9 @@ ReminderApp is a modern, lightweight, and perfectly-styled Windows desktop utili
 ### Installation
 
 1. Go to the [Releases](#) tab of this repository.
-2. Download the latest `ReminderApp.exe` standalone executable.
-3. Execute the file! There is no installation required. You can simply drag and drop the `.exe` file into your Startup folder or create a desktop shortcut.
+2. Download the latest `ReminderApp.zip` file.
+3. Extract the contents of the ZIP file to any folder on your computer.
+4. Execute `ReminderApp.exe` inside the extracted folder. There is no formal installation required. You can simply create a desktop shortcut to this file or add the shortcut to your Windows Startup folder.
 
 ### Building from Source
 
@@ -38,10 +39,11 @@ If you prefer to compile from source:
 dotnet run --project ReminderApp
 ```
 
-To build a standalone executable:
+To build a release package:
 ```powershell
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishReadyToRun=true -p:PublishTrimmed=false
+dotnet publish -c Release
 ```
+This will compile the application in `bin/Release/net10.x/publish/`. You can copy the contents of that folder anywhere to use the app!
 
 ## Setup & Usage
 
